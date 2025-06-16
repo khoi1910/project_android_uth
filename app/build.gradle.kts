@@ -61,13 +61,14 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.coil.compose) // Check for the latest version
+    implementation(libs.coil.compose)
     implementation(libs.accompanist.pager.indicators)
-    implementation(libs.accompanist.pager) // Check for the latest version
+    implementation(libs.accompanist.pager)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.glide)
     implementation(libs.gson)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.appcompat)
 }

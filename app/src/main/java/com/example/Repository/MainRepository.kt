@@ -10,7 +10,7 @@ import com.google.firebase.database.ValueEventListener
 
 class MainRepository {
 
-    private val firebaseDatabase = FirebaseDatabase.getInstance()
+    private val firebaseDatabase = FirebaseDatabase.getInstance("https://projectandroid-87f0c-default-rtdb.asia-southeast1.firebasedatabase.app")
 
     fun loadBanner(): LiveData<MutableList<BannerModel>> {
         val listData = MutableLiveData<MutableList<BannerModel>>()
