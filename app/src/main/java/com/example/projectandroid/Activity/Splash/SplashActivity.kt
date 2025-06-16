@@ -1,9 +1,9 @@
 package com.example.projectandroid.Activity.Splash
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,26 +12,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.example.projectandroid.Activity.BaseMainActivity
+import com.example.projectandroid.Activity.Dashboard.MainActivity
 import com.example.projectandroid.R
 
 
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : BaseMainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -41,14 +43,18 @@ class SplashActivity : AppCompatActivity() {
             insets
         }
         setContent {
-            SplashScreenContent() // Gọi composable function với tên mới
+            // Đổi SplashScreen thành SplashScreenContent
+            SplashScreenContent (onGetStartedClick = {
+                // Sửa cú pháp Intent
+                startActivity(Intent(this, MainActivity::class.java))
+            })
         }
     }
 }
 
 @Composable
 @Preview
-fun SplashScreenContent(){
+fun SplashScreenContent(onGetStartedClick: () -> Unit={}){
     Column(modifier = Modifier
         .fillMaxSize()
         .background(color = colorResource(R.color.darkBrown))
@@ -67,7 +73,7 @@ fun SplashScreenContent(){
             )
 
             Image(painter = painterResource(R.drawable.pizza)
-            ,contentDescription = null,
+                ,contentDescription = null,
                 modifier = Modifier.run {
                     constrainAs(logiImg){
                         top.linkTo(backgroundImg.top)
@@ -101,6 +107,11 @@ fun SplashScreenContent(){
             color = Color.White,
             modifier = Modifier
                 .padding(16.dp)
+        )
+
+        GetStartedButton(onClick = onGetStartedClick,
+            modifier = Modifier
+                .padding(top = 16.dp)
         )
     }
 }
