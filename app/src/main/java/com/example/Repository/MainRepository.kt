@@ -3,6 +3,7 @@ package com.example.Repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.projectandroid.Domain.BannerModel
+import com.example.projectandroid.Domain.CategoryModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -11,6 +12,31 @@ import com.google.firebase.database.ValueEventListener
 class MainRepository {
 
     private val firebaseDatabase = FirebaseDatabase.getInstance("https://projectandroid-87f0c-default-rtdb.asia-southeast1.firebasedatabase.app")
+
+
+    fun loadCategory(): LiveData<MutableList<CategoryModel>> {
+        val listData = MutableLiveData<MutableList<CategoryModel>>()
+        val ref = firebaseDatabase.getReference("Category")
+        ref.addValueEventListener(object : ValueEventListener {
+            // Các phương thức của ValueEventListener sẽ được thêm vào đây
+            // onDataChange(snapshot: DataSnapshot)
+            // onCancelled(error: DatabaseError)
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val list = mutableListOf<CategoryModel>()
+                for (childSnapshot in snapshot.children) {
+                    val item = childSnapshot.getValue(CategoryModel::class.java)
+                    item?.let { list.add(it) }
+                }
+                listData.value = list
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+        // Bạn có thể cần trả về listData ở đây, tùy thuộc vào cách bạn quản lý LiveData
+        return listData
+    }
 
     fun loadBanner(): LiveData<MutableList<BannerModel>> {
         val listData = MutableLiveData<MutableList<BannerModel>>()
