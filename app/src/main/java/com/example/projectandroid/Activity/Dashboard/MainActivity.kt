@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import com.example.ViewModel.MainViewModel
 import com.example.projectandroid.Activity.BaseMainActivity
 import com.example.projectandroid.Domain.BannerModel
+import com.example.projectandroid.Domain.CategoryModel
+import com.example.projectandroid.activity.dashboard.CategorySection
 
 class MainActivity : BaseMainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,13 +40,25 @@ fun MainScreen() {
 
     val banners = remember { mutableStateListOf<BannerModel>() }
 
+    val categories = remember { mutableStateListOf<CategoryModel>() }
+
     var showBannerLoading by remember { mutableStateOf(value = true) }
+    var showCategoryLoading by remember { mutableStateOf(value = true) }
+
 
     LaunchedEffect(Unit) {
         viewModel.loadBanner().observeForever {
             banners.clear()
             banners.addAll(it)
             showBannerLoading = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadCategory().observeForever {
+            categories.clear()
+            categories.addAll(it)
+            showCategoryLoading = false
         }
     }
 
@@ -61,6 +75,10 @@ fun MainScreen() {
             }
             item{
                 Banner(banners, showBannerLoading)
+            }
+
+            item{
+                CategorySection(categories, showCategoryLoading)
             }
         }
     }
