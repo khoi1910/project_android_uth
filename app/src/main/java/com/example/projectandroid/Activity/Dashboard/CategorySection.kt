@@ -1,5 +1,7 @@
 package com.example.projectandroid.activity.dashboard
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,9 +21,12 @@ import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import com.example.projectandroid.Domain.CategoryModel
 import com.example.projectandroid.R
+import com.example.projectandroid.Activity.ItemsList.ItemsListActivity
 
 @Composable
 fun CategorySection(categories: SnapshotStateList<CategoryModel>, showCategoryLoading: Boolean) {
+    val context = LocalContext.current
+
     Text(
         text = "Choose Category",
         fontSize = 18.sp,
@@ -59,10 +65,18 @@ fun CategorySection(categories: SnapshotStateList<CategoryModel>, showCategoryLo
                                 .weight(1f)
                                 .padding(horizontal = 8.dp),
                             onClick = {
-                                // Handle click
+                                val categoryId = categoryModel.Id.toString()
+                                Log.d("CategorySection", "Clicked category: ${categoryModel.Name}, ID: $categoryId")
+
+                                val intent = Intent(context, ItemsListActivity::class.java).apply {
+                                    putExtra("id", categoryId) // Đảm bảo là String
+                                    putExtra("title", categoryModel.Name)
+                                }
+                                context.startActivity(intent)
                             }
                         )
                     }
+                    // Thêm Spacer cho các hàng không đủ 3 item
                     if (row.size < 3) {
                         repeat(times = 3 - row.size) {
                             Spacer(modifier = Modifier.weight(1f))
