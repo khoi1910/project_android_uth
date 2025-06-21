@@ -28,12 +28,12 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.projectandroid.Activity.BaseMainActivity
+import com.example.projectandroid.Activity.BaseActivity
 import com.example.projectandroid.Activity.Dashboard.MainActivity
 import com.example.projectandroid.R
 
 
-class SplashActivity : BaseMainActivity() {
+class SplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

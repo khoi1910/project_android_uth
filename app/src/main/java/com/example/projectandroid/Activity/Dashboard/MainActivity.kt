@@ -17,12 +17,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.ViewModel.MainViewModel
-import com.example.projectandroid.Activity.BaseMainActivity
+import com.example.projectandroid.Activity.BaseActivity
 import com.example.projectandroid.Domain.BannerModel
 import com.example.projectandroid.Domain.CategoryModel
 import com.example.projectandroid.activity.dashboard.CategorySection
 
-class MainActivity : BaseMainActivity() {
+class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
