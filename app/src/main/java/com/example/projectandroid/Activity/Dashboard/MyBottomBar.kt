@@ -1,5 +1,7 @@
 package com.example.projectandroid.Activity.Dashboard // Đảm bảo tên gói đúng với thư mục của bạn
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomAppBar
@@ -17,6 +19,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.projectandroid.Activity.Cart.CartActivity
 import com.example.projectandroid.R
 
 
@@ -35,12 +38,11 @@ fun MyBottomBar(){
                 selected = (selectedItem == bottomMenuItem.label),
                 onClick = {
                     selectedItem = bottomMenuItem.label
-                    // Bạn có thể thêm logic điều hướng ở đây, ví dụ:
-                    // if (bottomMenuItem.label == "Cart"){
-                    //    // navigate to Cart screen
-                    // } else if (bottomMenuItem.label == "Home"){
-                    //    // navigate to Home screen
-                    // }
+                    if(bottomMenuItem.label=="Cart"){
+                        context.startActivity(Intent(context, CartActivity::class.java))
+                    }else{
+                        Toast.makeText(context, bottomMenuItem.label, Toast.LENGTH_SHORT).show()
+                    }
                 },
                 icon = {
                     Icon(painter = bottomMenuItem.icon,
