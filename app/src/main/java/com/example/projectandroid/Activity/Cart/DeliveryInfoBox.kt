@@ -1,5 +1,7 @@
 package com.example.projectandroid.Activity.Cart
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -19,53 +21,93 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.projectandroid.Helper.ManagmentCart
 import com.example.projectandroid.R
 
 @Composable
 fun DeliveryInfoBox(){
+    val context = LocalContext.current
+    val managmentCart = ManagmentCart(context)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)
-            .background(color = colorResource(R.color.grey), shape = RoundedCornerShape(10.dp))
-            .padding(8.dp)
     ) {
-        InfoItem(
-            title = "Your Delivery Address",
-            content = "NY-downtown-no97",
-            icon = painterResource(R.drawable.location)
-        )
+        // Delivery Info Section
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = colorResource(R.color.grey), shape = RoundedCornerShape(10.dp))
+                .padding(8.dp)
+        ) {
+            InfoItem(
+                title = "Your Delivery Address",
+                content = "UTH",
+                icon = painterResource(R.drawable.location)
+            )
 
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-        InfoItem(
-            title = "Patment Method", // Note: There's a typo here, it should be "Payment Method"
-            content = "Cash",
-            icon = painterResource(R.drawable.credit_card)
-        )
-    }
+            InfoItem(
+                title = "Payment Method",
+                content = "Payment with QR Code",
+                icon = painterResource(R.drawable.credit_card)
+            )
+        }
 
-    Button(
-        onClick = { /* TODO: Handle button click */ }, // The image shows an empty lambda {}
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(R.color.orange)
-        ),
-        modifier = Modifier
-            .padding(vertical = 32.dp)
-            .fillMaxWidth()
-            .height(50.dp)
-    ) {
-        Text(
-            text = "Place Order",
-            fontSize = 18.sp,
-            color = Color.White
-        )
+        // Place Order Button
+        Button(
+            onClick = {
+                try {
+                    val cartItems = managmentCart.getListCart()
+                    if (cartItems.isNotEmpty()) {
+                        // Lưu đơn hàng đã thanh toán
+                        managmentCart.savePaidOrder(cartItems)
+
+                        // Xóa tất cả sản phẩm trong cart
+                        managmentCart.clearCart()
+
+                        // Hiển thị thông báo thành công
+                        Toast.makeText(context, "Payment successful", Toast.LENGTH_SHORT).show()
+
+                        // Chuyển sang OrderStatusActivity
+                        val intent = Intent(context, com.example.projectandroid.Activity.OrderStatus.OrderStatusActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        context.startActivity(intent)
+
+                        // Nếu context là Activity, có thể finish để user không quay lại cart trống
+                        if (context is androidx.activity.ComponentActivity) {
+                            context.finish()
+                        }
+                    } else {
+                        Toast.makeText(context, "Cart is empty", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error processing order: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            },
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.orange)
+            ),
+            modifier = Modifier
+                .padding(vertical = 32.dp)
+                .fillMaxWidth()
+                .height(50.dp)
+        ) {
+            Text(
+                text = "Place Order",
+                fontSize = 18.sp,
+                color = Color.White
+            )
+        }
     }
 }
 

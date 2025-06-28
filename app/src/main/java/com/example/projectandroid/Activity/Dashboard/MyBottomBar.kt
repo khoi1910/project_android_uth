@@ -40,7 +40,9 @@ fun MyBottomBar(){
                     selectedItem = bottomMenuItem.label
                     if(bottomMenuItem.label=="Cart"){
                         context.startActivity(Intent(context, CartActivity::class.java))
-                    }else{
+                    } else if (bottomMenuItem.label == "Order") {
+                        context.startActivity(Intent(context, com.example.projectandroid.Activity.OrderStatus.OrderStatusActivity::class.java))
+                    } else {
                         Toast.makeText(context, bottomMenuItem.label, Toast.LENGTH_SHORT).show()
                     }
                 },

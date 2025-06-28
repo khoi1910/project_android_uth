@@ -151,6 +151,8 @@ fun SignUpScreen(onSignUp: (String, String) -> Unit, onBack: () -> Unit) {
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Title Section
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -288,16 +290,18 @@ fun SignUpScreen(onSignUp: (String, String) -> Unit, onBack: () -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Back to Login
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Already have an account? ",
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 16.sp
                 )
                 TextButton(
                     onClick = onBack,
@@ -306,10 +310,13 @@ fun SignUpScreen(onSignUp: (String, String) -> Unit, onBack: () -> Unit) {
                     Text(
                         "Sign In",
                         color = colorResource(R.color.orange),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

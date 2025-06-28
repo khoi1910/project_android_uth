@@ -29,12 +29,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -152,7 +150,7 @@ fun LoginScreen(onLogin: (String, String) -> Unit, onBack: () -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             // Title Section
             Column(
@@ -235,22 +233,7 @@ fun LoginScreen(onLogin: (String, String) -> Unit, onBack: () -> Unit) {
                         )
                     )
 
-                    // Forgot Password
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(
-                            onClick = { /* Handle forgot password */ },
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                "Forgot Password?",
-                                color = colorResource(R.color.orange),
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
+
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -277,65 +260,18 @@ fun LoginScreen(onLogin: (String, String) -> Unit, onBack: () -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            // Divider
+            // Sign Up Link
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.3f)
-                )
-                Text(
-                    text = "  OR  ",
-                    color = Color.White.copy(alpha = 0.6f),
-                    fontSize = 14.sp
-                )
-                Divider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.3f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Social Login Button (placeholder)
-            OutlinedButton(
-                onClick = { /* Handle social login */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color.White
-                ),
-                border = ButtonDefaults.outlinedButtonBorder.copy(
-                    width = 1.dp,
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.3f), Color.White.copy(alpha = 0.3f))
-                    )
-                ),
-                shape = RoundedCornerShape(28.dp)
-            ) {
-                Text(
-                    "Continue with Google",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Sign Up Link
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
                 Text(
                     text = "Don't have an account? ",
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 16.sp
                 )
                 TextButton(
                     onClick = onBack,
@@ -344,10 +280,13 @@ fun LoginScreen(onLogin: (String, String) -> Unit, onBack: () -> Unit) {
                     Text(
                         "Sign Up",
                         color = colorResource(R.color.orange),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
