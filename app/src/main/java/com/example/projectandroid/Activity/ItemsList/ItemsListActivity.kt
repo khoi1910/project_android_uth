@@ -76,6 +76,9 @@ private fun ItemsListScreen(
     var hasTimedOut by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var sortOrder by remember { mutableStateOf(SortOrder.NONE) }
+    var minPrice by remember { mutableStateOf(0.0) }
+    var maxPrice by remember { mutableStateOf(Double.MAX_VALUE) }
+    var minRating by remember { mutableStateOf(0.0) }
     var isSearchExpanded by remember { mutableStateOf(false) }
 
     // Animations
@@ -118,10 +121,14 @@ private fun ItemsListScreen(
         items.filter { it.Title.contains(searchQuery, ignoreCase = true) }
     }
 
+    val advancedFilteredItems = filteredItems.filter {
+        it.Price >= minPrice && it.Price <= maxPrice && it.Star >= minRating
+    }
+
     val sortedItems = when (sortOrder) {
-        SortOrder.PRICE_ASC -> filteredItems.sortedBy { it.Price }
-        SortOrder.PRICE_DESC -> filteredItems.sortedByDescending { it.Price }
-        else -> filteredItems
+        SortOrder.PRICE_ASC -> advancedFilteredItems.sortedBy { it.Price }
+        SortOrder.PRICE_DESC -> advancedFilteredItems.sortedByDescending { it.Price }
+        else -> advancedFilteredItems
     }
 
     Box(
@@ -319,6 +326,93 @@ private fun ItemsListScreen(
                             onClick = { sortOrder = SortOrder.PRICE_DESC }
                         )
                     }
+                }
+            }
+            // Advanced Filter UI
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.95f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "Advanced Filters",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = colorResource(id = R.color.darkPurple),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    Text(
+                        text = "Price Range",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        color = colorResource(id = R.color.darkPurple),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = if (minPrice == 0.0) "" else minPrice.toString(),
+                            onValueChange = {
+                                minPrice = it.toDoubleOrNull() ?: 0.0
+                            },
+                            label = { Text("Min") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = colorResource(id = R.color.orange),
+                                unfocusedBorderColor = colorResource(id = R.color.grey),
+                                cursorColor = colorResource(id = R.color.orange)
+                            )
+                        )
+                        OutlinedTextField(
+                            value = if (maxPrice == Double.MAX_VALUE) "" else maxPrice.toString(),
+                            onValueChange = {
+                                maxPrice = it.toDoubleOrNull() ?: Double.MAX_VALUE
+                            },
+                            label = { Text("Max") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = colorResource(id = R.color.orange),
+                                unfocusedBorderColor = colorResource(id = R.color.grey),
+                                cursorColor = colorResource(id = R.color.orange)
+                            )
+                        )
+                    }
+                    Text(
+                        text = "Minimum Rating",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        color = colorResource(id = R.color.darkPurple),
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                    )
+                    OutlinedTextField(
+                        value = if (minRating == 0.0) "" else minRating.toString(),
+                        onValueChange = {
+                            minRating = it.toDoubleOrNull() ?: 0.0
+                        },
+                        label = { Text("Rating") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colorResource(id = R.color.orange),
+                            unfocusedBorderColor = colorResource(id = R.color.grey),
+                            cursorColor = colorResource(id = R.color.orange)
+                        )
+                    )
                 }
             }
 
