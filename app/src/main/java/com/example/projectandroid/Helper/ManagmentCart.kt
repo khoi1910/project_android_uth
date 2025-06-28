@@ -1,10 +1,8 @@
-package com.uilover.project2142.Helper
+package com.example.projectandroid.Helper
 
 import android.content.Context
 import android.widget.Toast
 import com.example.projectandroid.Domain.FoodModel
-import com.example.projectandroid.Helper.TinyDB
-import com.uilover.project2142.Model.ChangeNumberItemsListener
 
 
 class ManagmentCart(val context: Context) {

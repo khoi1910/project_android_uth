@@ -71,4 +71,5 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.appcompat)
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1")
 }

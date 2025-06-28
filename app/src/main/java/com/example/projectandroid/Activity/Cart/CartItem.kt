@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.example.projectandroid.Domain.FoodModel
+import com.example.projectandroid.Helper.ManagmentCart
 import com.example.projectandroid.R
-import com.uilover.project2142.Helper.ManagmentCart
 import java.text.DecimalFormat
 
 @Composable

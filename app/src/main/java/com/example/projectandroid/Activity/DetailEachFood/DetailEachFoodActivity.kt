@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.projectandroid.Activity.BaseActivity
 import com.example.projectandroid.Domain.FoodModel
-import com.uilover.project2142.Helper.ManagmentCart
+import com.example.projectandroid.Helper.ManagmentCart
 
 class DetailEachFoodActivity : BaseActivity() {
     private lateinit var item: FoodModel
