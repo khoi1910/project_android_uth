@@ -6,10 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,9 +35,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.projectandroid.Activity.BaseActivity
-import com.example.projectandroid.Activity.Dashboard.MainActivity
 import com.example.projectandroid.R
-
 
 class SplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,75 +47,106 @@ class SplashActivity : BaseActivity() {
             insets
         }
         setContent {
-            // Đổi SplashScreen thành SplashScreenContent
-            SplashScreenContent (onGetStartedClick = {
-                // Sửa cú pháp Intent
-                startActivity(Intent(this, MainActivity::class.java))
-            })
+            SplashScreenContent(
+                onGetStartedClick = {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                },
+                onSignUpClick = {
+                    startActivity(Intent(this, SignUpActivity::class.java))
+                }
+            )
         }
     }
 }
 
 @Composable
 @Preview
-fun SplashScreenContent(onGetStartedClick: () -> Unit={}){
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(color = colorResource(R.color.darkBrown))
-    ){
-        ConstraintLayout(modifier= Modifier.padding(top = 48.dp)) {
-            val (backgroundImg,logiImg) = createRefs()
+fun SplashScreenContent(
+    onGetStartedClick: () -> Unit = {},
+    onSignUpClick: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = colorResource(R.color.darkBrown))
+    ) {
+        ConstraintLayout(modifier = Modifier.padding(top = 48.dp)) {
+            val (backgroundImg, logoImg) = createRefs()
+
             Image(
-                painter = painterResource(id= R.drawable.intro_pic),
+                painter = painterResource(id = R.drawable.intro_pic),
                 contentDescription = null,
                 modifier = Modifier
-                    .constrainAs(backgroundImg){
+                    .constrainAs(backgroundImg) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                     }
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                contentScale = ContentScale.Crop
             )
 
-            Image(painter = painterResource(R.drawable.pizza)
-                ,contentDescription = null,
-                modifier = Modifier.run {
-                    constrainAs(logiImg){
-                        top.linkTo(backgroundImg.top)
-                        bottom.linkTo(backgroundImg.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                }, contentScale = ContentScale.Fit
+            Image(
+                painter = painterResource(R.drawable.pizza),
+                contentDescription = null,
+                modifier = Modifier.constrainAs(logoImg) {
+                    top.linkTo(backgroundImg.top)
+                    bottom.linkTo(backgroundImg.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                contentScale = ContentScale.Fit
             )
         }
+
         val styledText = buildAnnotatedString {
             append("Welcome to your ")
-            withStyle(style = SpanStyle(color = colorResource(R.color.orange))){
-                append("food\nparadis ")
+            withStyle(style = SpanStyle(color = colorResource(R.color.orange))) {
+                append("food\nparadise ")
             }
-            append(" experience food perfection delivered")
+            append("experience food perfection delivered")
         }
 
         Text(
-            text=styledText,
+            text = styledText,
             fontSize = 27.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier
-                .padding(top=32.dp)
-                .padding(horizontal=16.dp)
+                .padding(top = 32.dp, start = 16.dp, end = 16.dp)
         )
+
         Text(
             text = stringResource(R.string.splashSubtitle),
             fontSize = 16.sp,
             color = Color.White,
-            modifier = Modifier
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         )
 
-        GetStartedButton(onClick = onGetStartedClick,
+        Row(
             modifier = Modifier
-                .padding(top = 16.dp)
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = onGetStartedClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.orange))
+            ) {
+                Text("Get Started", fontWeight = FontWeight.SemiBold)
+            }
+
+            OutlinedButton(
+                onClick = onSignUpClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            ) {
+                Text("Sign Up", fontWeight = FontWeight.SemiBold)
+            }
+        }
     }
 }
