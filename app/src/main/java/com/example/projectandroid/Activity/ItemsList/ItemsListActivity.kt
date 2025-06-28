@@ -57,6 +57,7 @@ private fun ItemsListScreen(
     val items by viewModel.loadFiltered(id).observeAsState(emptyList())
     var isLoading by remember { mutableStateOf(true) }
     var hasTimedOut by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
     // Reset loading state when id changes
     LaunchedEffect(id) {
@@ -81,6 +82,12 @@ private fun ItemsListScreen(
             Log.d("ItemsListScreen", "Loading timed out for category: $id")
         }
         isLoading = false
+    }
+
+    val filteredItems = if (searchQuery.isEmpty()) {
+        items
+    } else {
+        items.filter { it.Title.contains(searchQuery, ignoreCase = true) }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -111,6 +118,24 @@ private fun ItemsListScreen(
             )
         }
 
+        androidx.compose.material3.OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            placeholder = { androidx.compose.material3.Text(text = "Search food...") },
+            singleLine = true,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = colorResource(id = R.color.orange),
+                unfocusedBorderColor = colorResource(id = R.color.grey),
+                cursorColor = colorResource(id = R.color.orange),
+                focusedPlaceholderColor = colorResource(id = R.color.grey),
+                unfocusedPlaceholderColor = colorResource(id = R.color.grey)
+            )
+        )
+
         // Content
         when {
             isLoading && !hasTimedOut -> {
@@ -121,7 +146,7 @@ private fun ItemsListScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
+                        androidx.compose.material3.Text(
                             text = "Loading $title...",
                             fontSize = 16.sp,
                             color = colorResource(R.color.darkPurple)
@@ -129,28 +154,28 @@ private fun ItemsListScreen(
                     }
                 }
             }
-            items.isEmpty() -> {
+            filteredItems.isEmpty() -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
+                        androidx.compose.material3.Text(
                             text = "No items found",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorResource(R.color.darkPurple)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "This category is empty or no data available",
+                        androidx.compose.material3.Text(
+                            text = "No food matches your search",
                             fontSize = 14.sp,
                             color = colorResource(R.color.darkPurple),
                             modifier = Modifier.padding(horizontal = 32.dp),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
+                        androidx.compose.material3.Text(
                             text = "Category ID: $id",
                             fontSize = 12.sp,
                             color = colorResource(R.color.darkPurple),
@@ -161,7 +186,7 @@ private fun ItemsListScreen(
                 }
             }
             else -> {
-                ItemsList(items)
+                ItemsList(filteredItems)
             }
         }
     }
