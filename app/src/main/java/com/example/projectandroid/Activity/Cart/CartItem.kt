@@ -47,7 +47,7 @@ fun CartItem(
             .border(1.dp, colorResource(R.color.grey), shape = RoundedCornerShape(10.dp))
     ) {
         val (pic,titleTxt,feeEachTime,totalEachItem,quantity)=createRefs()
-        var numberInCart by remember { mutableStateOf(item.numberInCart) }
+        var numberInCart by remember { mutableStateOf(if (item.numberInCart < 1) 1 else item.numberInCart) }
         val decimalFormat= DecimalFormat( "#.00")
         Image(
             painter = rememberAsyncImagePainter(item.ImagePath),
@@ -152,9 +152,11 @@ fun CartItem(
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
                 }.clickable {
-                    managmentCart.minusItem(cartItems, cartItems.indexOf(item)){onItemChange()}
-                    numberInCart--
-                    item.numberInCart=numberInCart
+                    if (numberInCart > 1) {
+                        managmentCart.minusItem(cartItems, cartItems.indexOf(item)){onItemChange()}
+                        numberInCart--
+                        item.numberInCart=numberInCart
+                    }
                 }
             ) {
                 Text(
