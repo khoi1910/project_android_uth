@@ -49,6 +49,9 @@
         <activity
             android:name=".Activity.OrderStatus.OrderStatusActivity"
             android:exported="false" />
+        <activity
+            android:name=".Activity.Favorite.FavoriteListActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
