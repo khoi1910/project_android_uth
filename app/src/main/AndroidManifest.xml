@@ -52,6 +52,9 @@
         <activity
             android:name=".Activity.Favorite.FavoriteListActivity"
             android:exported="false" />
+        <activity
+            android:name=".Activity.Profile.ProfileActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

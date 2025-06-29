@@ -8,19 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.ViewModel.MainViewModel
 import com.example.projectandroid.Activity.BaseActivity
+import com.example.projectandroid.Components.TopBar
 import com.example.projectandroid.Domain.BannerModel
 import com.example.projectandroid.Domain.CategoryModel
 import com.example.projectandroid.activity.dashboard.CategorySection
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,18 +31,33 @@ class MainActivity : BaseActivity() {
 
 @Composable
 fun MainScreen() {
-    val scaffoldState= rememberScaffoldState()
-
+    val scaffoldState = rememberScaffoldState()
     val viewModel = MainViewModel()
 
     val banners = remember { mutableStateListOf<BannerModel>() }
-
     val categories = remember { mutableStateListOf<CategoryModel>() }
 
-    var showBannerLoading by remember { mutableStateOf(value = true) }
-    var showCategoryLoading by remember { mutableStateOf(value = true) }
+    var showBannerLoading by remember { mutableStateOf(true) }
+    var showCategoryLoading by remember { mutableStateOf(true) }
 
+    // Firebase auth & display name
+    val user = FirebaseAuth.getInstance().currentUser
+    val firestore = FirebaseFirestore.getInstance()
+    var displayName by remember { mutableStateOf("") }
 
+    LaunchedEffect(user?.uid) {
+        user?.uid?.let { uid ->
+            firestore.collection("users").document(uid).get()
+                .addOnSuccessListener { doc ->
+                    displayName = doc.getString("displayName") ?: user.displayName ?: ""
+                }
+                .addOnFailureListener {
+                    displayName = user.displayName ?: ""
+                }
+        }
+    }
+
+    // Load banners
     LaunchedEffect(Unit) {
         viewModel.loadBanner().observeForever {
             banners.clear()
@@ -54,6 +66,7 @@ fun MainScreen() {
         }
     }
 
+    // Load categories
     LaunchedEffect(Unit) {
         viewModel.loadCategory().observeForever {
             categories.clear()
@@ -62,22 +75,22 @@ fun MainScreen() {
         }
     }
 
-    Scaffold(bottomBar = { MyBottomBar() }
-        , scaffoldState = scaffoldState
-    ) {
-        paddingValues ->
-        LazyColumn (modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues=paddingValues)
+    Scaffold(
+        bottomBar = { MyBottomBar() },
+        scaffoldState = scaffoldState
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            item{
-                TopBar()
+            item {
+                TopBar(displayName = displayName)
             }
-            item{
+            item {
                 Banner(banners, showBannerLoading)
             }
-
-            item{
+            item {
                 CategorySection(categories, showCategoryLoading)
             }
         }
