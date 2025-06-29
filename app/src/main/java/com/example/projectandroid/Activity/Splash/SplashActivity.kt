@@ -18,6 +18,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -35,6 +40,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.projectandroid.Activity.BaseActivity
+import com.example.projectandroid.Activity.Dashboard.MainActivity
+import com.example.projectandroid.Helper.AuthManager
 import com.example.projectandroid.R
 
 class SplashActivity : BaseActivity() {
@@ -46,15 +53,31 @@ class SplashActivity : BaseActivity() {
             view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val authManager = AuthManager(this)
         setContent {
-            SplashScreenContent(
-                onGetStartedClick = {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                },
-                onSignUpClick = {
-                    startActivity(Intent(this, SignUpActivity::class.java))
+            var isLoggedIn by remember { mutableStateOf(false) }
+            var showSplash by remember { mutableStateOf(true) }
+
+            LaunchedEffect(Unit) {
+                isLoggedIn = authManager.isLoggedIn()
+                if (isLoggedIn) {
+                    showSplash = false
+                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                    finish()
                 }
-            )
+            }
+
+            if (showSplash) {
+                SplashScreenContent(
+                    onGetStartedClick = {
+                        startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
+                    },
+                    onSignUpClick = {
+                        startActivity(Intent(this@SplashActivity, SignUpActivity::class.java))
+                    }
+                )
+            }
         }
     }
 }
