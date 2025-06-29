@@ -62,6 +62,7 @@ class SplashActivity : BaseActivity() {
             LaunchedEffect(Unit) {
                 isLoggedIn = authManager.isLoggedIn()
                 if (isLoggedIn) {
+                    authManager.updateLoginTime() // Update the login time
                     showSplash = false
                     startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                     finish()
@@ -151,7 +152,7 @@ fun SplashScreenContent(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Nút Sign Up nằm bên trái
+            // Sign Up button on the left
             OutlinedButton(
                 onClick = onSignUpClick,
                 modifier = Modifier
@@ -162,7 +163,7 @@ fun SplashScreenContent(
                 Text("Sign Up", fontWeight = FontWeight.SemiBold)
             }
 
-            // Nút Sign In nằm bên phải
+            // Sign In button on the right
             Button(
                 onClick = onGetStartedClick,
                 modifier = Modifier

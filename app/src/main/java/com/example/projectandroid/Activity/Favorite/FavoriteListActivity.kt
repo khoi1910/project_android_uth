@@ -46,10 +46,12 @@ import com.example.projectandroid.Activity.ItemsList.FoodDetails
 import com.example.projectandroid.Activity.ItemsList.FoodImage
 import com.example.projectandroid.Domain.FoodModel
 import com.example.projectandroid.Helper.ManagmentFavorite
+import com.example.projectandroid.Helper.NetworkUtils
 import com.example.projectandroid.R
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import kotlinx.coroutines.launch
 
 // Define SortOrder enum
 enum class SortOrder {
@@ -87,12 +89,29 @@ fun FavoriteListScreen(
     onBackClick: () -> Unit,
     onRemoveItem: (FoodModel) -> Unit
 ) {
+    val context = LocalContext.current
+    val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
     var isSearchExpanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var sortOrder by remember { mutableStateOf(SortOrder.NONE) }
     var minPrice by remember { mutableStateOf(0.0) }
     var maxPrice by remember { mutableStateOf(Double.MAX_VALUE) }
     var minRating by remember { mutableStateOf(0.0) }
+
+    // Show offline warning if network is unavailable
+    LaunchedEffect(isNetworkAvailable) {
+        if (!isNetworkAvailable) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "You are in offline mode, only cached data can be viewed",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
 
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
@@ -147,7 +166,18 @@ fun FavoriteListScreen(
                 ) {
                     // Back Button
                     IconButton(
-                        onClick = onBackClick,
+                        onClick = {
+                            if (isNetworkAvailable) {
+                                onBackClick()
+                            } else {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "You are in offline mode, cannot perform actions",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
@@ -180,7 +210,18 @@ fun FavoriteListScreen(
 
                     // Search Toggle Button
                     IconButton(
-                        onClick = { isSearchExpanded = !isSearchExpanded },
+                        onClick = {
+                            if (isNetworkAvailable) {
+                                isSearchExpanded = !isSearchExpanded
+                            } else {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "You are in offline mode, cannot perform actions",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
@@ -221,7 +262,18 @@ fun FavoriteListScreen(
                 ) {
                     OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = {
+                            if (isNetworkAvailable) {
+                                searchQuery = it
+                            } else {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "You are in offline mode, cannot perform actions",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
@@ -240,7 +292,18 @@ fun FavoriteListScreen(
                         },
                         trailingIcon = if (searchQuery.isNotEmpty()) {
                             {
-                                IconButton(onClick = { searchQuery = "" }) {
+                                IconButton(onClick = {
+                                    if (isNetworkAvailable) {
+                                        searchQuery = ""
+                                    } else {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "You are in offline mode, cannot perform actions",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    }
+                                }) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Clear",
@@ -301,19 +364,52 @@ fun FavoriteListScreen(
                             text = "Default",
                             icon = Icons.Default.Close,
                             isSelected = sortOrder == SortOrder.NONE,
-                            onClick = { sortOrder = SortOrder.NONE }
+                            onClick = {
+                                if (isNetworkAvailable) {
+                                    sortOrder = SortOrder.NONE
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "You are in offline mode, cannot perform actions",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            }
                         )
                         SortChip(
                             text = "Low to High",
                             icon = Icons.Default.KeyboardArrowUp,
                             isSelected = sortOrder == SortOrder.PRICE_ASC,
-                            onClick = { sortOrder = SortOrder.PRICE_ASC }
+                            onClick = {
+                                if (isNetworkAvailable) {
+                                    sortOrder = SortOrder.PRICE_ASC
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "You are in offline mode, cannot perform actions",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            }
                         )
                         SortChip(
                             text = "High to Low",
                             icon = Icons.Default.KeyboardArrowDown,
                             isSelected = sortOrder == SortOrder.PRICE_DESC,
-                            onClick = { sortOrder = SortOrder.PRICE_DESC }
+                            onClick = {
+                                if (isNetworkAvailable) {
+                                    sortOrder = SortOrder.PRICE_DESC
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "You are in offline mode, cannot perform actions",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            }
                         )
                     }
                 }
@@ -354,7 +450,16 @@ fun FavoriteListScreen(
                         OutlinedTextField(
                             value = if (minPrice == 0.0) "" else minPrice.toString(),
                             onValueChange = {
-                                minPrice = it.toDoubleOrNull() ?: 0.0
+                                if (isNetworkAvailable) {
+                                    minPrice = it.toDoubleOrNull() ?: 0.0
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "You are in offline mode, cannot perform actions",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
                             },
                             label = { Text("Min") },
                             modifier = Modifier.weight(1f),
@@ -369,7 +474,16 @@ fun FavoriteListScreen(
                         OutlinedTextField(
                             value = if (maxPrice == Double.MAX_VALUE) "" else maxPrice.toString(),
                             onValueChange = {
-                                maxPrice = it.toDoubleOrNull() ?: Double.MAX_VALUE
+                                if (isNetworkAvailable) {
+                                    maxPrice = it.toDoubleOrNull() ?: Double.MAX_VALUE
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "You are in offline mode, cannot perform actions",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
                             },
                             label = { Text("Max") },
                             modifier = Modifier.weight(1f),
@@ -392,7 +506,16 @@ fun FavoriteListScreen(
                     OutlinedTextField(
                         value = if (minRating == 0.0) "" else minRating.toString(),
                         onValueChange = {
-                            minRating = it.toDoubleOrNull() ?: 0.0
+                            if (isNetworkAvailable) {
+                                minRating = it.toDoubleOrNull() ?: 0.0
+                            } else {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "You are in offline mode, cannot perform actions",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
                         },
                         label = { Text("Rating") },
                         modifier = Modifier.fillMaxWidth(),
@@ -408,6 +531,7 @@ fun FavoriteListScreen(
             }
 
             Scaffold(
+                snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                 content = { paddingValues ->
                     if (sortedItems.isEmpty()) {
                         Box(
@@ -465,7 +589,8 @@ fun FavoriteListScreen(
                                 FavoriteItem(
                                     item = item,
                                     index = index,
-                                    onRemoveItem = onRemoveItem
+                                    onRemoveItem = onRemoveItem,
+                                    snackbarHostState = snackbarHostState
                                 )
                             }
                         }
@@ -530,9 +655,12 @@ fun SortChip(
 fun FavoriteItem(
     item: FoodModel,
     index: Int,
-    onRemoveItem: (FoodModel) -> Unit
+    onRemoveItem: (FoodModel) -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     val context = LocalContext.current
+    val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
+    val coroutineScope = rememberCoroutineScope()
     val isEvenRow = index % 2 == 0
 
     Card(
@@ -540,13 +668,22 @@ fun FavoriteItem(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
-                val intent = Intent(
-                    context,
-                    DetailEachFoodActivity::class.java
-                ).apply {
-                    putExtra("object", item)
+                if (isNetworkAvailable) {
+                    val intent = Intent(
+                        context,
+                        DetailEachFoodActivity::class.java
+                    ).apply {
+                        putExtra("object", item)
+                    }
+                    startActivity(context, intent, null)
+                } else {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "You are in offline mode, cannot perform actions",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
                 }
-                startActivity(context, intent, null)
             },
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
@@ -564,9 +701,37 @@ fun FavoriteItem(
             if (isEvenRow) {
                 FoodImage(item = item)
                 FoodDetails(item = item)
-                DeleteButton(item = item, onRemoveItem = onRemoveItem)
+                DeleteButton(
+                    item = item,
+                    onRemoveItem = {
+                        if (isNetworkAvailable) {
+                            onRemoveItem(it)
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "You are in offline mode, cannot perform actions",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }
+                    }
+                )
             } else {
-                DeleteButton(item = item, onRemoveItem = onRemoveItem)
+                DeleteButton(
+                    item = item,
+                    onRemoveItem = {
+                        if (isNetworkAvailable) {
+                            onRemoveItem(it)
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "You are in offline mode, cannot perform actions",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }
+                    }
+                )
                 FoodDetails(item = item)
                 FoodImage(item = item)
             }

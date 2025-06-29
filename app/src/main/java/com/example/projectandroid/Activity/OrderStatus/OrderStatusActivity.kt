@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +24,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.projectandroid.Domain.FoodModel
 import com.example.projectandroid.Helper.ManagmentCart
+import com.example.projectandroid.Helper.NetworkUtils
 import com.example.projectandroid.R
+import kotlinx.coroutines.launch
 
 class OrderStatusActivity : AppCompatActivity() {
     private lateinit var managmentCart: ManagmentCart
@@ -33,7 +36,7 @@ class OrderStatusActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         managmentCart = ManagmentCart(this)
 
-        // Lấy đơn hàng đã thanh toán từ SharedPreferences
+        // Retrieve paid orders from SharedPreferences
         paidItems.addAll(managmentCart.getPaidOrder())
 
         setContent {
@@ -50,219 +53,255 @@ fun OrderStatusScreen(
     paidItems: List<FoodModel>,
     onBackClick: () -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Header với nút back và title căn giữa
-        item {
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 36.dp, bottom = 24.dp)
-            ) {
-                val (backBtn, titleTxt) = createRefs()
+    val context = LocalContext.current
+    val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(titleTxt) { centerTo(parent) },
-                    text = "Order Status",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    color = colorResource(R.color.darkPurple)
-                )
-
-                Image(
-                    painter = painterResource(R.drawable.back_grey),
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .constrainAs(backBtn) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                        }
-                        .clickable { onBackClick() }
-                        .padding(4.dp)
+    // Show offline warning if network is unavailable
+    LaunchedEffect(isNetworkAvailable) {
+        if (!isNetworkAvailable) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "You are in offline mode, only cached data can be viewed",
+                    duration = SnackbarDuration.Short
                 )
             }
         }
+    }
 
-        if (paidItems.isEmpty()) {
-            // Empty state với styling đẹp hơn
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // Header with back button and centered title
             item {
-                Card(
+                ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        .padding(top = 36.dp, bottom = 24.dp)
                 ) {
-                    Column(
+                    val (backBtn, titleTxt) = createRefs()
+
+                    Text(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(48.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "📦",
-                            fontSize = 48.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        Text(
-                            text = "Order is Empty",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "You haven't placed any orders yet",
-                            fontSize = 16.sp,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                }
-            }
-        } else {
-            // Success header với design đẹp hơn
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF4CAF50)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                ) {
-                    Column(
+                            .constrainAs(titleTxt) { centerTo(parent) },
+                        text = "Order Status",
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = colorResource(R.color.darkPurple)
+                    )
+
+                    Image(
+                        painter = painterResource(R.drawable.back_grey),
+                        contentDescription = "Back",
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "🎉",
-                            fontSize = 32.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = "Order Successful!",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "Your order has been placed successfully",
-                            fontSize = 16.sp,
-                            color = Color.White.copy(alpha = 0.9f),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
+                            .constrainAs(backBtn) {
+                                top.linkTo(parent.top)
+                                bottom.linkTo(parent.bottom)
+                                start.linkTo(parent.start)
+                            }
+                            .clickable {
+                                if (isNetworkAvailable) {
+                                    onBackClick()
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "You are in offline mode, cannot perform actions",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            }
+                            .padding(4.dp)
+                    )
                 }
             }
 
-            // Section header cho ordered items
-            item {
-                Text(
-                    text = "Ordered Items",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorResource(R.color.darkPurple),
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-            }
-
-            // List các items đã order
-            items(paidItems) { item ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Row(
+            if (paidItems.isEmpty()) {
+                // Empty state with enhanced styling
+                item {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(vertical = 32.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(48.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = item.Title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
+                                text = "📦",
+                                fontSize = 48.sp,
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Quantity: ${item.numberInCart}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                text = "Order is Empty",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "You haven't placed any orders yet",
+                                fontSize = 16.sp,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-
-                        Text(
-                            text = "$${String.format("%.2f", item.Price * item.numberInCart)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color(0xFF4CAF50),
-                            fontWeight = FontWeight.Bold
-                        )
                     }
                 }
-            }
-
-            // Total amount với design đẹp hơn
-            item {
-                val totalAmount = paidItems.sumOf { it.Price * it.numberInCart }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = colorResource(R.color.darkPurple)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Row(
+            } else {
+                // Success header with enhanced design
+                item {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(bottom = 20.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF4CAF50)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                     ) {
-                        Text(
-                            text = "Total Amount",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "$${String.format("%.2f", totalAmount)}",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "🎉",
+                                fontSize = 32.sp,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "Order Successful!",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Your order has been placed successfully",
+                                fontSize = 16.sp,
+                                color = Color.White.copy(alpha = 0.9f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            // Thêm khoảng trống cuối trang
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
+                // Section header for ordered items
+                item {
+                    Text(
+                        text = "Ordered Items",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorResource(R.color.darkPurple),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
+                // List of ordered items
+                items(paidItems) { item ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = item.Title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Quantity: ${item.numberInCart}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+
+                            Text(
+                                text = "$${String.format("%.2f", item.Price * item.numberInCart)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color(0xFF4CAF50),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Total amount with enhanced design
+                item {
+                    val totalAmount = paidItems.sumOf { it.Price * it.numberInCart }
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.darkPurple)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Total Amount",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "$${String.format("%.2f", totalAmount)}",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                // Add spacing at the bottom
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
+
+        // Snackbar for offline notifications
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
