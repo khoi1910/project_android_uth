@@ -128,16 +128,7 @@ fun SplashScreenContent(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
-                onClick = onGetStartedClick,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.orange))
-            ) {
-                Text("Get Started", fontWeight = FontWeight.SemiBold)
-            }
-
+            // Nút Sign Up nằm bên trái
             OutlinedButton(
                 onClick = onSignUpClick,
                 modifier = Modifier
@@ -146,6 +137,17 @@ fun SplashScreenContent(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
             ) {
                 Text("Sign Up", fontWeight = FontWeight.SemiBold)
+            }
+
+            // Nút Sign In nằm bên phải
+            Button(
+                onClick = onGetStartedClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.orange))
+            ) {
+                Text("Sign In", fontWeight = FontWeight.SemiBold)
             }
         }
     }
