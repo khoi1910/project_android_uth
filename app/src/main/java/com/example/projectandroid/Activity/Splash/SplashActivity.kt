@@ -43,6 +43,8 @@ import com.example.projectandroid.Activity.BaseActivity
 import com.example.projectandroid.Activity.Dashboard.MainActivity
 import com.example.projectandroid.Helper.AuthManager
 import com.example.projectandroid.R
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 
 class SplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,21 +57,46 @@ class SplashActivity : BaseActivity() {
         }
 
         val authManager = AuthManager(this)
+        val auth = FirebaseAuth.getInstance()
+
         setContent {
             var isLoggedIn by remember { mutableStateOf(false) }
             var showSplash by remember { mutableStateOf(true) }
+            var checkingAuth by remember { mutableStateOf(true) }
 
             LaunchedEffect(Unit) {
+                // Kiểm tra trạng thái đăng nhập
                 isLoggedIn = authManager.isLoggedIn()
+
                 if (isLoggedIn) {
-                    authManager.updateLoginTime() // Update the login time
-                    showSplash = false
-                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                    finish()
+                    // Đã đăng nhập và token còn hạn -> refresh token và chuyển về Main
+                    auth.currentUser?.getIdToken(true)?.addOnSuccessListener { result ->
+                        val token = result.token
+                        if (token != null) {
+                            authManager.saveAuthToken(token)
+                            // Chuyển về MainActivity
+                            startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                            finish()
+                        } else {
+                            // Token không hợp lệ -> hiện splash để đăng nhập
+                            checkingAuth = false
+                            showSplash = true
+                        }
+                    }?.addOnFailureListener {
+                        // Lỗi khi refresh token -> hiện splash để đăng nhập
+                        checkingAuth = false
+                        showSplash = true
+                    }
+                } else {
+                    // Chưa đăng nhập -> hiện splash sau delay
+                    delay(2000) // Hiện splash trong 2 giây
+                    checkingAuth = false
+                    showSplash = true
                 }
             }
 
-            if (showSplash) {
+            // Chỉ hiện splash screen khi cần thiết
+            if (showSplash && !checkingAuth) {
                 SplashScreenContent(
                     onGetStartedClick = {
                         startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
@@ -79,6 +106,7 @@ class SplashActivity : BaseActivity() {
                     }
                 )
             }
+            // Khi đang check auth, có thể hiện loading hoặc màn hình trống
         }
     }
 }

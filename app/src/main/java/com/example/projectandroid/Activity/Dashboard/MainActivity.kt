@@ -1,5 +1,6 @@
 package com.example.projectandroid.Activity.Dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,9 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.ViewModel.MainViewModel
 import com.example.projectandroid.Activity.BaseActivity
+import com.example.projectandroid.Activity.Splash.SplashActivity
 import com.example.projectandroid.Components.TopBar
 import com.example.projectandroid.Domain.BannerModel
 import com.example.projectandroid.Domain.CategoryModel
+import com.example.projectandroid.Helper.AuthManager
 import com.example.projectandroid.activity.dashboard.CategorySection
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,6 +25,34 @@ import com.google.firebase.firestore.FirebaseFirestore
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Kiểm tra trạng thái đăng nhập
+        val authManager = AuthManager(this)
+
+        // Nếu chưa đăng nhập hoặc token hết hạn -> chuyển đến SplashActivity
+        if (!authManager.isLoggedIn()) {
+            startActivity(Intent(this, SplashActivity::class.java))
+            finish()
+            return
+        }
+
+        // Đã đăng nhập và token còn hạn -> tiếp tục hiển thị MainActivity
+        // Refresh token trong background để duy trì session
+        val auth = FirebaseAuth.getInstance()
+        auth.currentUser?.getIdToken(true)?.addOnSuccessListener { result ->
+            val token = result.token
+            if (token != null) {
+                authManager.saveAuthToken(token)
+            }
+        }?.addOnFailureListener {
+            // Nếu refresh token thất bại, có thể token đã hết hạn
+            // Chuyển về splash để đăng nhập lại
+            startActivity(Intent(this, SplashActivity::class.java))
+            finish()
+            return@addOnFailureListener
+        }
+
+        // Hiển thị MainActivity
         enableEdgeToEdge()
         setContent {
             MainScreen()

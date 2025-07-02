@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import com.example.projectandroid.Activity.Dashboard.MainActivity
 import com.example.projectandroid.R
 import com.google.firebase.auth.FirebaseAuth
+import com.example.projectandroid.Helper.AuthManager
 
 class LoginActivity : ComponentActivity() {
 
@@ -91,9 +92,18 @@ class LoginActivity : ComponentActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    auth.currentUser?.getIdToken(false)?.addOnSuccessListener { result ->
+                        val token = result.token
+                        if (token != null) {
+                            val authManager = AuthManager(this)
+                            authManager.saveAuthToken(token)
+                            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
+                        }
+                    }?.addOnFailureListener { e ->
+                        Toast.makeText(this, "Error getting token: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 } else {
                     Toast.makeText(this, "Login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
