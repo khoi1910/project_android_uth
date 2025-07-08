@@ -186,12 +186,15 @@ fun CartItem(
                     newList.forEach { managmentCart.insertItem(it) }
                     onItemChange()
                 }
+                .padding(top = 6.dp, start = 5.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Remove from Favorites",
                 tint = colorResource(id = R.color.darkPurple),
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier
+                    .size(20.dp)
+                    .padding(top = 4.dp)
             )
         }
     }
