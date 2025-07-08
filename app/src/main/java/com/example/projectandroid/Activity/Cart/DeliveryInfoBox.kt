@@ -28,12 +28,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.projectandroid.Helper.ManagmentCart
+import com.example.projectandroid.Helper.ManagmentOrder
+import com.example.projectandroid.Helper.ManagmentOrderFirestore
+import com.example.projectandroid.Domain.OrderModel
 import com.example.projectandroid.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.*
 
 @Composable
 fun DeliveryInfoBox(){
     val context = LocalContext.current
     val managmentCart = ManagmentCart(context)
+    val managmentOrder = ManagmentOrder(context)
+    val userId = "userId_placeholder" // TODO: Lấy userId thực tế từ Auth hoặc lưu trữ
+    val managmentOrderFirestore = ManagmentOrderFirestore(context, userId)
+    val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     Column(
         modifier = Modifier
@@ -68,17 +79,32 @@ fun DeliveryInfoBox(){
                 try {
                     val cartItems = managmentCart.getListCart()
                     if (cartItems.isNotEmpty()) {
-                        // Lưu đơn hàng đã thanh toán
-                        managmentCart.savePaidOrder(cartItems)
+                        // Tạo OrderModel mới
+                        val order = OrderModel(
+                            orderId = UUID.randomUUID().toString(),
+                            orderDate = System.currentTimeMillis(),
+                            totalAmount = managmentCart.getTotalFee(),
+                            items = cartItems,
+                            status = "Completed"
+                        )
 
-                        // Xóa tất cả sản phẩm trong cart
+                        // Lưu đơn hàng lên Firestore và bộ nhớ cục bộ
+                        coroutineScope.launch {
+                            managmentOrderFirestore.savePaidOrder(order)
+                            managmentOrder.saveOrder(order)
+                        }
+
+                        // Xóa giỏ hàng cục bộ và Firestore
                         managmentCart.clearCart()
+                        coroutineScope.launch {
+                            // Nếu có ManagmentCartFirestore, xóa giỏ hàng Firestore ở đây
+                        }
 
                         // Hiển thị thông báo thành công
                         Toast.makeText(context, "Payment successful", Toast.LENGTH_SHORT).show()
 
-                        // Chuyển sang OrderStatusActivity
-                        val intent = Intent(context, com.example.projectandroid.Activity.OrderStatus.OrderStatusActivity::class.java)
+                        // Chuyển sang OrderListActivity
+                        val intent = Intent(context, com.example.projectandroid.Activity.OrderStatus.OrderListActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         context.startActivity(intent)
 

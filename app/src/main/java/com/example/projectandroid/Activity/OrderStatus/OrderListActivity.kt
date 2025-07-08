@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,44 +16,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.projectandroid.Domain.OrderModel
+import com.example.projectandroid.Helper.ManagmentOrderFirestore
 import com.example.projectandroid.R
-import androidx.compose.foundation.clickable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class OrderStatusActivity : AppCompatActivity() {
-    private var orders = mutableStateListOf<OrderModel>()
+class OrderListActivity : AppCompatActivity() {
+    private lateinit var viewModel: ManagmentOrderFirestore
+    private val userId = "userId_placeholder" // TODO: Lấy userId thực tế từ Auth hoặc lưu trữ
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // TODO: Lấy danh sách đơn hàng từ bộ nhớ cục bộ hoặc Firestore
-        // Hiện tại để demo, tạo danh sách mẫu
-        orders.addAll(
-            listOf(
-                OrderModel(
-                    orderId = "ORD001",
-                    orderDate = System.currentTimeMillis(),
-                    totalAmount = 100.0,
-                    items = listOf(),
-                    status = "Completed"
-                ),
-                OrderModel(
-                    orderId = "ORD002",
-                    orderDate = System.currentTimeMillis(),
-                    totalAmount = 200.0,
-                    items = listOf(),
-                    status = "Completed"
-                )
-            )
-        )
+        viewModel = ManagmentOrderFirestore(this, userId)
 
         setContent {
-            OrderStatusScreen(
+            var orders by remember { mutableStateOf(listOf<OrderModel>()) }
+            val coroutineScope = rememberCoroutineScope()
+
+            LaunchedEffect(Unit) {
+                coroutineScope.launch {
+                    orders = viewModel.getPaidOrders()
+                }
+            }
+
+            OrderListScreen(
                 orders = orders,
                 onOrderClick = { order ->
                     val intent = Intent(this, OrderDetailActivity::class.java)
@@ -65,7 +61,7 @@ class OrderStatusActivity : AppCompatActivity() {
 }
 
 @Composable
-fun OrderStatusScreen(
+fun OrderListScreen(
     orders: List<OrderModel>,
     onOrderClick: (OrderModel) -> Unit,
     onBackClick: () -> Unit
@@ -87,24 +83,29 @@ fun OrderStatusScreen(
                     Text(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .constrainAs(titleTxt) { centerTo(parent) },
-                        text = "Order Status",
+                            .constrainAs(titleTxt) {
+                                centerHorizontallyTo(parent)
+                                centerVerticallyTo(parent)
+                            },
+                        text = "Order List",
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         fontSize = 25.sp,
                         color = colorResource(R.color.darkPurple)
                     )
 
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.constrainAs(backBtn) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                        }
-                    ) {
-                        Text("< Back", color = colorResource(R.color.orange))
-                    }
+                    Image(
+                        painter = painterResource(R.drawable.back_grey),
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .constrainAs(backBtn) {
+                                top.linkTo(parent.top)
+                                bottom.linkTo(parent.bottom)
+                                start.linkTo(parent.start)
+                            }
+                            .clickable { onBackClick() }
+                            .padding(4.dp)
+                    )
                 }
             }
 

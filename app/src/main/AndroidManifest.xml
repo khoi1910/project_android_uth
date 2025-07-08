@@ -51,14 +51,16 @@
             android:name=".Activity.BaseActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.OrderStatus.OrderStatusActivity"
-            android:exported="false" />
-        <activity
             android:name=".Activity.Favorite.FavoriteListActivity"
             android:exported="false" />
         <activity
             android:name=".Activity.Profile.ProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".Activity.OrderStatus.OrderListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.OrderStatus.OrderDetailActivity"
+            android:exported="false" />
     </application>
-
 </manifest>
