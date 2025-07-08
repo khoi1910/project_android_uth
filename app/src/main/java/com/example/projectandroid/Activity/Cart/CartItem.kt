@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,7 +49,7 @@ fun CartItem(
             .fillMaxWidth()
             .border(1.dp, colorResource(R.color.grey), shape = RoundedCornerShape(10.dp))
     ) {
-        val (pic,titleTxt,feeEachTime,totalEachItem,quantity)=createRefs()
+        val (pic,titleTxt,feeEachTime,totalEachItem,quantity, deleteBtn)=createRefs()
         var numberInCart by remember { mutableStateOf(if (item.numberInCart < 1) 1 else item.numberInCart) }
         val decimalFormat= DecimalFormat( "#.00")
         Image(
@@ -168,6 +171,28 @@ fun CartItem(
                     textAlign = TextAlign.Center
                 )
             }
+        }
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .constrainAs(deleteBtn) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                }
+                .clickable {
+                    val currentList = managmentCart.getListCart()
+                    val newList = currentList.filter { it.Title != item.Title }
+                    managmentCart.clearCart()
+                    newList.forEach { managmentCart.insertItem(it) }
+                    onItemChange()
+                }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Remove from Favorites",
+                tint = colorResource(id = R.color.darkPurple),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
